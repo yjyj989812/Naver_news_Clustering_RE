@@ -2,15 +2,22 @@ from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
 from clustering_model import clustering_model
 from dendrogram import plot_dendrogram
+from tfidf import generate_doc
 
 
 def main(file_path):
-    # 총 문서 갯수
-    num_documents = 0
+    file_path = "aticle_sample.csv"
+    text_column = "context"
 
-    # 각 문서에 대한 라벨 생성
-    document_labels = [f"Document{x}" for x in range(1, num_documents+1)]
-    yield from sample_data["context"]
+    num_documents = sum(1 for _ in generate_doc(file_path, text_column))
+
+    document_labels = ['Document{}'.format(i) for i in range(1, num_documents + 1)]
+
+    # # 총 문서 갯수
+    # num_documents = 0
+
+    # # 각 문서에 대한 라벨 생성
+    # document_labels = [f"Document{x}" for x in range(1, num_documents+1)]
 
 
 
