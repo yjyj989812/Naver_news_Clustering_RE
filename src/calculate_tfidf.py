@@ -17,3 +17,6 @@ def calculate_tfidf(documents_generator):
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(documents_generator)
     return tfidf_matrix
+
+
+    
