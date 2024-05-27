@@ -5,10 +5,9 @@ from dendrogram import plot_dendrogram
 import os, subprocess, json
 from urllib import parse
 import sqlalchemy
-import nltk
 import pandas as pd
 import preprocess
-
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 with open(f"../conn_db.json", "r", encoding='utf-8') as f:
     keys = json.load(f)
 
@@ -43,48 +42,63 @@ def documents_generator(processed_df: pd.DataFrame):
             log(f"null context found in {idx}!", 1)
 
 def main():
-    log(f"retrieving dataframe from database...")
-    lim = 25000
-    log(f"with lim : {lim}")
-    df = retrieve_df(lim)
+    try:
+        log(f"retrieving dataframe from database...")
+        lim = 25000
+        log(f"with lim : {lim}")
+        df = retrieve_df(lim)
+    except Exception as e:
+        log(f"exception occurred during dataframe retrieval: {e}", 1)
+    flag = 0
+    try:
+        # 전처리
+        # null 값 처리
+        df = df.dropna()
+        log(f"null values removed")
+        # 전처리작업을 거친 df를 반환
+        log(f"processing on rows...")
+        df2 = preprocess.preprocess_df(df=df).copy()
+        log("processed columns assigned.")
+        # 문서별 정제된 title + context를 기준으로 hash값 생성
+        log(f"hash id generating...") 
+        df3 = preprocess.create_hash(df2).copy()
+        log(f"hash id assigned for each doc.")
 
-    # 전처리
-    # null 값 처리
-    df = df.dropna()
-    log(f"null values removed")
-    # 전처리작업을 거친 df를 반환
-    log(f"processing on rows...")
-    df2 = preprocess.preprocess_df(df=df).copy()
-    log("processed columns assigned.")
-    # 문서별 정제된 title + context를 기준으로 hash값 생성
-    log(f"hash id generating...") 
-    df3 = preprocess.create_hash(df2).copy()
-    log(f"hash id assigned for each doc.")
+        flag += 1 # 1
+        # Tf-idf 가중치 계산
+        log(f"tfidf calculation init")
+        tfidf_matrix = calculate_tfidf(documents_generator(df3))
+        log(f"tfidf calculation done")
 
-    # Tf-idf 가중치 계산
-    # documents_generator 필요
-    log(f"tfidf calculation init")
-    tfidf_matrix = calculate_tfidf(documents_generator(df3))
-    log(f"tfidf calculation done")
-    
-    # 코사인 유사도 계산
-    log(f"calculating cosine similarity...")
-    similarity_matrix = calculate_cosine_similarity(tfidf_matrix)
-    log(f"cosine similarity calculated")
-    
-    # 클러스터링 모델
-    log(f"clustering init")
-    clustering = clustering_model(similarity_matrix)
-    log(f"clustering done")
-    
-    # 덴드로그램 
-    # 총 문서 갯수
-    num_documents = df.shape[0]
-    # 각 문서에 대한 라벨 생성
-    document_labels = [f"{df3.iloc[x]['docKey']}" for x in range(num_documents)]
-    log(f"plotting init")
-    plot_dendrogram(clustering, document_labels)
-    log(f"plotting done")
+        flag += 1 # 2
+        # 코사인 유사도 계산
+        log(f"calculating cosine similarity...")
+        similarity_matrix = calculate_cosine_similarity(tfidf_matrix)
+        #similarity_matrix = calculate_cosine_similarity(tfidf_matrix, True)
+        log(f"cosine similarity calculated")
+
+        flag += 1 # 3
+        # 클러스터링 모델
+        log(f"clustering init")
+        clustering = clustering_model(similarity_matrix)
+        log(f"clustering done")
+
+        flag += 1 # 4
+        # 덴드로그램 
+        # 총 문서 갯수
+        num_documents = df.shape[0]
+        # 각 문서에 대한 라벨 생성
+        document_labels = [f"{df3.iloc[x]['docKey']}" for x in range(num_documents)]
+        log(f"plotting init")
+        plot_dendrogram(clustering, document_labels)
+        log(f"plotting done")
+
+    except Exception as e:
+        if flag==0: log(f"exception occurred during data preprocess: {e}", 1)
+        elif flag==1: log(f"exception occurred during tfidf calculation: {e}", 1)
+        elif flag==2: log(f"exception occurred during cosine similarity calculation: {e}", 1)
+        elif flag==3: log(f"exception occurred during clustering: {e}", 1)
+        elif flag==4: log(f"exception occurred during dendrogram plotting: {e}", 1)    
     
 if __name__ == "__main__":
     """
