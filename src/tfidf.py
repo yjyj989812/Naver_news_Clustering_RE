@@ -39,7 +39,6 @@ def preprocessing(documents):
 
 @profile
 def calculate_tfidf(documents_generator):
-    print("1")
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(documents_generator)
     return tfidf_matrix
