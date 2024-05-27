@@ -9,7 +9,7 @@ import nltk
 import pandas as pd
 import preprocess
 
-with open(f"..\\conn_db.json", "r", encoding='utf-8') as f:
+with open(f"../conn_db.json", "r", encoding='utf-8') as f:
     keys = json.load(f)
 
 def log(msg, flag=None):    
