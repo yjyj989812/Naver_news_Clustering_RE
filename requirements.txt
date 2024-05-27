@@ -1,5 +1,6 @@
 babel==2.15.0
 chunkdot==0.4.2
+cityhash==0.4.7
 dask==2024.5.1
 ipykernel==6.29.4
 matplotlib==3.9.0

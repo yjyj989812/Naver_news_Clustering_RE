@@ -22,11 +22,7 @@ def log(msg, flag=None):
         assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
     else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
 
-def retrieve_df():
-    engine = establish_conn()
-    return pd.read_sql_query("select * from english_news_lake LIMIT 1000", con=engine)
-
-def establish_conn()->sqlalchemy.Engine:
+def retrieve_df()->pd.DataFrame:
     user = keys['user']
     password = keys['password']
     host = keys['host']
@@ -34,14 +30,17 @@ def establish_conn()->sqlalchemy.Engine:
     database = keys['database']
     password = parse.quote_plus(password)
     engine = sqlalchemy.create_engine(f"mysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4")
-    return engine
+    df = pd.read_sql_query("select * from {} LIMIT 1000".format(keys['table']), con=engine)
+    return df
 
-def documents_generator(df:pd.DataFrame):
-    log(f"generating documents from dataframe...")
-    log(f"iteration init")
-    for idx, row in df.iterrows():
-        log(f"iteration index : {idx}, row : {row}")
-        yield from row['processed_context']
+def documents_generator(processed_df: pd.DataFrame):
+    log("Generating documents from dataframe...")
+    log("Iteration init")
+    for idx, row in processed_df.iterrows():
+        if pd.notnull(row['processed_context']):
+            yield row['processed_context']  # Yield entire document
+        else:
+            log(f"null context found in {idx}!", 1)
 
 def main():
     log(f"retrieving dataframe from database...")
@@ -53,18 +52,15 @@ def main():
 
     # 전처리
     # null 값 처리
-    df = preprocess.remove_null_rows(df=df).copy()
-    log(f"df shape={df.shape}")
+    df = df.dropna()
     log(f"null values removed")
     # 전처리작업을 거친 df를 반환
     log(f"processing on rows...")
     df2 = preprocess.preprocess_df(df=df).copy()
-    log(f"df2 shape={df2.shape}")
     log("processed columns assigned.")
     # 문서별 정제된 title + context를 기준으로 hash값 생성
     log(f"hash id generating...") 
     df3 = preprocess.create_hash(df2).copy()
-    log(f"df3 shape={df3.columns.tolist()}")
     log(f"hash id assigned for each doc.")
 
     # Tf-idf 가중치 계산
