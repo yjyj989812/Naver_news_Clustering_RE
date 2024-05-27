@@ -10,7 +10,7 @@ def main(file_path):
 
     # 각 문서에 대한 라벨 생성
     document_labels = [f"Document{x}" for x in range(1, num_documents+1)]
-    
+    yield from sample_data["context"]
 
 
 
