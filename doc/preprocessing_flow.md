@@ -33,8 +33,9 @@ dataSource | title | context |
 - 생성함수는 `preprocessing_fun.py`에 있음
 
 #### 2-8. hash 포함, 전처리된 df를 DB에 전송
-- 추가 필요(당담: 유정연)
-- Talbe 명: english_news_warehouse   
+- 추가 필요 (담당: 유정연)
+- Table 명: english_news_warehouse   
+
 | dataSource | title | context | docKey |
 
 - - -
