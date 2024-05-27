@@ -16,13 +16,13 @@ def log(msg, flag=None):
     if flag==None:
         flag = 0
     head = ["debug", "error", "status"]
-    from time import gmtime, strftime
-    now = strftime("%H:%M:%S", gmtime())
+    from time import localtime, strftime
+    now = strftime("%H:%M:%S", localtime())
     if not os.path.isfile("./debug.log"):
         assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
     else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
 
-def retrieve_df()->pd.DataFrame:
+def retrieve_df(lim:int)->pd.DataFrame:
     user = keys['user']
     password = keys['password']
     host = keys['host']
@@ -30,7 +30,7 @@ def retrieve_df()->pd.DataFrame:
     database = keys['database']
     password = parse.quote_plus(password)
     engine = sqlalchemy.create_engine(f"mysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4")
-    df = pd.read_sql_query("select * from {} LIMIT 1000".format(keys['table']), con=engine)
+    df = pd.read_sql_query("select * from {} LIMIT {}".format(keys['table'], lim), con=engine)
     return df
 
 def documents_generator(processed_df: pd.DataFrame):
@@ -44,11 +44,9 @@ def documents_generator(processed_df: pd.DataFrame):
 
 def main():
     log(f"retrieving dataframe from database...")
-    df = retrieve_df()
-    # 총 문서 갯수
-    num_documents = df.shape[0]
-    # 각 문서에 대한 라벨 생성
-    document_labels = [f"Document{x}" for x in range(1, num_documents+1)]
+    lim = 25000
+    log(f"with lim : {lim}")
+    df = retrieve_df(lim)
 
     # 전처리
     # null 값 처리
@@ -80,15 +78,15 @@ def main():
     log(f"clustering done")
     
     # 덴드로그램 
+    # 총 문서 갯수
+    num_documents = df.shape[0]
+    # 각 문서에 대한 라벨 생성
+    document_labels = [f"{df3.iloc[x]['docKey']}" for x in range(num_documents)]
     log(f"plotting init")
     plot_dendrogram(clustering, document_labels)
     log(f"plotting done")
     
 if __name__ == "__main__":
-    # download from nltk
-    nltk.download('punkt')
-    nltk.download('stopwords')
-    nltk.download('wordnet')
     """
     변경사항
     """
