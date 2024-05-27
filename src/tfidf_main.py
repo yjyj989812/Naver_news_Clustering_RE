@@ -34,4 +34,7 @@ def main(file_path):
 
 if __name__ == "__main__":
     file_path = ""
+    """
+    git merge
+    """
     main(file_path)
