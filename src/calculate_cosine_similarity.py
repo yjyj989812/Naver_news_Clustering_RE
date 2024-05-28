@@ -1,7 +1,7 @@
 from sklearn.metrics.pairwise import cosine_similarity
-import tensorflow as tf
 from line_profiler import profile
-
+import cupy as cp
+import cupyx.scipy.sparse
 
 @profile
 def calculate_cosine_similarity(tfidf_matrix):
@@ -17,27 +17,25 @@ def calculate_cosine_similarity(tfidf_matrix):
     
     return similarity_matrix
 
+@profile
+def calculate_cosine_similarity_gpu(tfidf_matrix):
+    """
+    tfidf_matrix 'sparse matrix'를 인자로 받아
+    코사인 유사도를 리턴
 
-# def calculate_cosine_similarity(tfidf_matrix, use_gpu=False):
-#     if use_gpu:
-#         # GPU를 사용하여 계산하기 위해 TensorFlow GPU 설정
-#         physical_devices = tf.config.list_physical_devices('GPU')
-#         if physical_devices:
-#             tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    
-#     # 희소 배열을 밀집 배열로 변환
-#     tfidf_matrix_dense = tfidf_matrix.toarray()
-    
-#     # 밀집 배열을 TensorFlow 텐서로 변환
-#     tfidf_matrix_tf = tf.constant(tfidf_matrix_dense, dtype=tf.float32)
-    
-#     # 각 벡터의 L2 norm을 계산
-#     norm = tf.norm(tfidf_matrix_tf, axis=1, keepdims=True)
-    
-#     # 각 벡터를 L2 norm으로 나누어 정규화
-#     normalized_matrix = tfidf_matrix_tf / norm
-    
-#     # 코사인 유사도 계산
-#     similarity_matrix = tf.matmul(normalized_matrix, normalized_matrix, transpose_b=True)
-    
-#     return similarity_matrix.numpy()
+    Parameters:
+    tfidf_matrix (scipy.sparse.csr_matrix): TF-IDF 행렬.
+
+    Returns:
+    cupy.ndarray: 코사인 유사도 행렬.
+    """
+    # 희소 행렬을 Cupy로 변환
+    tfidf_matrix_gpu = cp.sparse.csr_matrix(tfidf_matrix)
+
+    # 각 행의 L2 노름을 계산
+    norm = cp.sqrt((tfidf_matrix_gpu.multiply(tfidf_matrix_gpu)).sum(axis=1))
+
+    # 코사인 유사도 계산
+    similarity_matrix = tfidf_matrix_gpu.dot(tfidf_matrix_gpu.T) / (norm.dot(norm.T) + 1e-10)
+
+    return similarity_matrix

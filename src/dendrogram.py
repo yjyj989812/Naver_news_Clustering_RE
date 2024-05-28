@@ -29,7 +29,7 @@ def plot_dendrogram(clustering, labels):
     now = strftime("%H%M%S", localtime())
 
     lim = len(labels)
-    plt.savefig(os.path.join(CURRENT, f"./results/dendrogram_{now}_lim{lim}.png"))
+    plt.savefig(os.path.join(CURRENT, f"./results/dendrogram_{now}_size{lim}.png"))
     #plt.show()
 
 @profile
@@ -48,10 +48,10 @@ def plot_fcluster(datapoints, clusters, labels):
     if not os.path.isdir(result_path):
         os.path.mkdir(result_path)
     plt.figure(figsize=(10, 7))
-    plt.scatter(datapoints[:, 0], datapoints[:, 1], c=clusters, cmap='prism')
+    plt.scatter(datapoints[:, 0], datapoints[:, 1], c=clusters, cmap='RdYlGn')
     plt.title('Data points and cluster assignments')
-    plt.xlabel('t-SNE dim 1')
-    plt.ylabel('t-SNE dim 2')
+    plt.xlabel('PCA-UMAP dim 1')
+    plt.ylabel('PCA-UMAP dim 2')
     now = strftime("%H%M%S", localtime())
     lim = len(labels)
     plt.savefig(os.path.join(CURRENT, f"./results/fclusters_{now}_lim{lim}.png"))

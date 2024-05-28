@@ -17,16 +17,16 @@ if [ -d "$result_path" ]; then
     echo "Directory already exists. Continuing on scripts..."
 
     # 추가 코드 실행
-    kernprof -l -v src/main.py > "$result_path/profiler_result.txt"
+    kernprof -l -v src/main.py > $result_path/profiler_result.txt
 else
     # 폴더가 존재하지 않으면 폴더를 생성
-    mkdir -p "$result_path"
+    mkdir -p $result_path
     if [ $? -ne 0 ]; then
         echo "Error occurred while making directory"
     else
         echo "Successfully made directory"
 
         # 추가 코드 실행
-        kernprof -l -v src/main.py > "$result_path/profiler_result.txt"
+        kernprof -l -v src/main.py > $result_path/profiler_result.txt
     fi
 fi

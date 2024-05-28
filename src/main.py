@@ -1,12 +1,12 @@
 # custom packages
 from calculate_tfidf import calculate_tfidf
-from calculate_cosine_similarity import calculate_cosine_similarity
+from calculate_cosine_similarity import calculate_cosine_similarity, calculate_cosine_similarity_gpu
 from dendrogram import plot_dendrogram, plot_fcluster
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
 from clustered_dataframe import retrieve_cluster_results, dataframe_rand_selection
 from clustering_model import clustering_model, reduce_dimensions, get_cluster_documents, retrieve_fcluster
-from log import log, logging
+from log import log, step_log
 
 # external packages
 import os, json, pickle, pathlib
@@ -24,14 +24,17 @@ def main():
     try:
         # DB에서 Dataframe 추출
         log(f"retrieving dataframe from database...")
-        lim = 1000
+        lim = 60000
         log(f"with lim : {lim}")
-        df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
+        num_rows = 1000
+        table = "tokenized"
+        df = retrieve_df(lim, table, keys) # "lake", "tokenized", "warehouse"
         
         flag += 1 # 1
         # Dataframe에서 랜덤하게 절반의 크기로 선택
         log(f"random selection on progress...")
-        filtered_df, label_index = dataframe_rand_selection(df)
+        log(f"dataframe will be randomly selected to size of {num_rows}.")
+        filtered_df = dataframe_rand_selection(df, num_rows)
         # random으로 선택된 row들이기 때문에 index를 초기화
         df = filtered_df.reset_index(drop=True)
         log(f"random selection done with shape of {df.shape}")
@@ -56,7 +59,7 @@ def main():
         # 코사인 유사도 계산
         log(f"calculating cosine similarity...")
         similarity_matrix = calculate_cosine_similarity(tfidf_matrix)
-        #similarity_matrix = calculate_cosine_similarity(tfidf_matrix, True)
+        #similarity_matrix = calculate_cosine_similarity_gpu(tfidf_matrix) # insufficient resources
         log(f"cosine similarity calculated")
 
 
@@ -84,15 +87,14 @@ def main():
         log(f"plotting done")
         
         flag += 1 # 6
-        with open(os.path.join(BASEDIR, "./results/result_df.pkl"), "wb") as f:
+        with open(os.path.join(BASEDIR, f"./results/result_df_({lim}_{num_rows}).pkl"), "wb") as f:
             pickle.dump(retrieve_cluster_results(df, clusters), f)
         for clust_idx in range(1, num_clusters+1):
             cluster_docs = get_cluster_documents(df, clusters, clust_idx)
             log(f"size of cluster #{clust_idx} = {len(cluster_docs)}")
 
-
     except Exception as e:
-        logging(flag, e)
+        step_log(flag, e)
     
 if __name__ == "__main__":
     """

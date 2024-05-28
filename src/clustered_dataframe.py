@@ -30,7 +30,7 @@ def retrieve_cluster_results(df:pd.DataFrame, clusters):
     return result_df
 
 @profile
-def dataframe_rand_selection(df):
+def dataframe_rand_selection(df:pd.DataFrame, num_rows:int=None):
     """
     데이터프레임에서 절반의 행을 랜덤하게 선택하여 새로운 데이터프레임을 반환하는 함수
 
@@ -43,9 +43,10 @@ def dataframe_rand_selection(df):
     데이터프레임에서 절반의 행을 랜덤하게 선택하여 새로운 데이터프레임과 선택된 행들의 hash id를 반환
     """
     np.random.seed(42)
-    num_rows = df.shape[0]
-    num_rows = num_rows // 2
+    if num_rows == None:
+        num_rows = df.shape[0]
+        num_rows = num_rows // 2
     selected_rows = np.random.choice(df.index, num_rows)
     new_df = df.loc[selected_rows]
-    labels = df.iloc[selected_rows, 0].tolist()
-    return new_df, labels
+    #labels = df.iloc[selected_rows, 0].tolist()
+    return new_df

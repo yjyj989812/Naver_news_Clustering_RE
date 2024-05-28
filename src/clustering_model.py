@@ -1,8 +1,11 @@
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
-from sklearn.decomposition import PCA
-import umap
+import cupy as cp
+#from sklearn.decomposition import IncrementalPCA
+from cuml import IncrementalPCA
+from umap import UMAP
+#from cuml.manifold import UMAP
 from sklearn.metrics import silhouette_score
 from line_profiler import profile
 from log import log
@@ -42,6 +45,8 @@ def retrieve_fcluster(Z, min_clusters: int, max_clusters: int, data_points: np.n
 
     Returns:
         np.ndarray: 최적의 클러스터링 결과 배열
+        int: 최적의 클러스터 개수
+        float: 최고 실루엣 점수
 
     계층적 클러스터링 결과에서 최적의 클러스터 개수를 결정하고 해당 클러스터링 결과를 반환
     """
@@ -60,15 +65,17 @@ def retrieve_fcluster(Z, min_clusters: int, max_clusters: int, data_points: np.n
                     best_num_clusters = num_clusters
                     best_clusters = clusters
             except Exception as e:
-                log(f"Exception occurred during silhouette scoring: {e}")
+                log(f"Exception occurred during silhouette scoring: {e}", 1)
                 continue
 
     return best_clusters, best_num_clusters
-    
+
 @profile
 def reduce_dimensions(tfidf_matrix):
     """
     TF-IDF 행렬을 사용하여 2차원 데이터 포인트로 차원 축소를 수행.
+
+    TF-IDF 행렬 -> IPCA -> UMAP -> datapoints
 
     Parameters:
     tfidf_matrix (scipy.sparse.csr.csr_matrix): TF-IDF 행렬.
@@ -82,18 +89,19 @@ def reduce_dimensions(tfidf_matrix):
     # 로그 메시지 출력
     log("Starting dimension reduction...")
     
-    # 데이터 정규화 및 PCA 초기화
-    log("Performing PCA initialization...")
-    pca = PCA(n_components=50, random_state=42)
-    pca_result = pca.fit_transform(tfidf_matrix.toarray())
+    log("Performing IPCA initialization...")
+    # IPCA 초기화
+    ipca = IncrementalPCA(n_components=50, batch_size=1000)
+    # 데이터를 배치로 나누어 IPCA 수행
+    ipca_result = ipca.fit_transform(tfidf_matrix)
     
     # UMAP 수행
     log("Applying UMAP...")
-    umap_model = umap.UMAP(n_components=2)
-    data_points = umap_model.fit_transform(pca_result)
-    
+    umap_model = UMAP(n_components=2)
+    #umap_model.fit(cp.asarray(ipca_result))
+    #data_points = umap_model.transform(cp.asarray(ipca_result))
+    data_points = umap_model.fit_transform(ipca_result)
     log("Dimension reduction completed.")
-    
     return data_points
 
 @profile
