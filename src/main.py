@@ -52,7 +52,7 @@ def main():
     flag = 0
     try:
         log(f"retrieving dataframe from database...")
-        lim = 100
+        lim = 10000
         log(f"with lim : {lim}")
         df = retrieve_df(lim, "tokenized") # "lake", "tokenized", "warehouse"
         flag += 1 # 1
