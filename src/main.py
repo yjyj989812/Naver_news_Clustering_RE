@@ -5,9 +5,9 @@ from dendrogram import plot_dendrogram, plot_fcluster
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
 from clustered_dataframe import retrieve_cluster_results
-import clustering_model
-from log import log
-import preprocess
+from clustering_model import clustering_model, reduce_dimensions, get_cluster_documents, retrieve_fcluster
+from log import log, logging
+
 # external packages
 import os, json, pickle, pathlib
 import numpy as np
@@ -86,15 +86,7 @@ def main():
 
 
     except Exception as e:
-        if flag==0: log(f"exception occurred during dataframe retrieval: {e}", 1)
-        elif flag==1: log(f"exception occurred during data preprocess: {e}", 1)
-        elif flag==2: log(f"exception occurred during tfidf calculation: {e}", 1)
-        elif flag==3: log(f"exception occurred during cosine similarity calculation: {e}", 1)
-        elif flag==4: log(f"exception occurred during clustering: {e}", 1)
-        elif flag==5: log(f"exception occurred during dendrogram plotting: {e}", 1)
-        elif flag==6: log(f"exception occurred during cluster result analysis: {e}", 1)
-        else:
-            log(f"exception on unexpected flag: {e}", 1)
+        logging(flag, e)
     
 if __name__ == "__main__":
     """
