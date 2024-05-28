@@ -10,6 +10,7 @@ import preprocess
 # external packages
 import os, json, pickle, pathlib
 import numpy as np
+from line_profiler import profile
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 BASEDIR = pathlib.Path(__file__).parent.resolve()
