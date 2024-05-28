@@ -50,7 +50,7 @@ def main():
     flag = 0
     try:
         log(f"retrieving dataframe from database...")
-        lim = 1000
+        lim = 100
         log(f"with lim : {lim}")
         df = retrieve_df(lim, "tokenized") # "lake", "tokenized", "warehouse"
         flag += 1 # 1
@@ -85,7 +85,9 @@ def main():
         # 클러스터링 모델
         log(f"clustering init")
         z = clustering_model(similarity_matrix)
-        clusters = retrieve_fcluster(z, 6, 8)
+        min_clusters = 4
+        max_clusters = 8
+        clusters = retrieve_fcluster(z, min_clusters, max_clusters)
         
         log(f"clustering done")
 
