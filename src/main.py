@@ -1,19 +1,17 @@
 # custom packages
 from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
-import clustering_model
 from dendrogram import plot_dendrogram, plot_fcluster
-import os, subprocess, json
-from urllib import parse
-import sqlalchemy
-import pandas as pd
-import preprocess
-from log import log
+from clustered_dataframe import retrieve_cluster_results
+from clustering_model import clustering_model, get_cluster_documents, retrieve_fcluster, reduce_dimensions
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
+from line_profiler import profile
+# external packages
+from log import log
 import numpy as np
 import pickle, pathlib
-from clustered_dataframe import retrieve_cluster_results
+import os, json
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 BASEDIR = pathlib.Path(__file__).parent.resolve()
@@ -47,7 +45,7 @@ def main():
         log(f"tfidf calculation init")
         tokens = "tokens"
         tfidf_matrix = calculate_tfidf(documents_generator(df, tokens))
-        datapoints = clustering_model.reduce_dimensions(tfidf_matrix)
+        datapoints = reduce_dimensions(tfidf_matrix)
         log(f"tfidf calculation done")
 
         flag += 1 # 3
@@ -60,10 +58,10 @@ def main():
         flag += 1 # 4
         # 클러스터링 모델
         log(f"clustering init")
-        z = clustering_model.clustering_model(similarity_matrix.toarray())
+        z = clustering_model(similarity_matrix.toarray())
         min_clusters = 4
         max_clusters = 8
-        clusters = clustering_model.retrieve_fcluster(z, min_clusters, max_clusters)
+        clusters = retrieve_fcluster(z, min_clusters, max_clusters)
         
         log(f"clustering done")
 
@@ -83,8 +81,9 @@ def main():
             pickle.dump(retrieve_cluster_results(df, clusters), f)
         num_clusters = len(np.unique(clusters))
         for clust_idx in range(1, num_clusters+1):
-            cluster_docs = clustering_model.get_cluster_documents(df, clusters, clust_idx)
+            cluster_docs = get_cluster_documents(df, clusters, clust_idx)
             log(f"size of cluster #{clust_idx} = {len(cluster_docs)}")
+
 
     except Exception as e:
         if flag==0: log(f"exception occurred during dataframe retrieval: {e}", 1)
@@ -105,7 +104,5 @@ if __name__ == "__main__":
         hierarchical agglomerative clustering
     """
 
-    os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-    
 
     main()
