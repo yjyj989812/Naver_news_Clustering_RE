@@ -1,6 +1,9 @@
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib.pyplot as plt
 from time import localtime, strftime
+import os, pathlib
+
+CURRENT = pathlib.Path(__file__).parent.resolve()
 
 def plot_dendrogram(clustering, labels):
     plt.figure(figsize=(10, 7))
@@ -10,7 +13,7 @@ def plot_dendrogram(clustering, labels):
     plt.title('Hierarchical Clustering Dendrogram')
     now = strftime("%H_%M_%S", localtime())
     lim = len(labels)
-    plt.savefig(f"./results/dendrogram_{now}_lim{lim}.png")
+    plt.savefig(os.path.join(CURRENT, f"./results/dendrogram_{now}_lim{lim}.png"))
     plt.show()
     
 def plot_fcluster(datapoints, clusters, labels):
@@ -22,5 +25,5 @@ def plot_fcluster(datapoints, clusters, labels):
     plt.ylabel('Feature 2')
     now = strftime("%H_%M_%S", localtime())
     lim = len(labels)
-    plt.savefig(f"./results/fclusters_{now}_lim{lim}.png")
+    plt.savefig(os.path.join(CURRENT, f"./results/fclusters_{now}_lim{lim}.png"))
     plt.show()

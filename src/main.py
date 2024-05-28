@@ -8,8 +8,10 @@ import sqlalchemy
 import pandas as pd
 import preprocess
 from line_profiler import profile
+import pathlib
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-with open(f"../conn_db.json", "r", encoding='utf-8') as f:
+BASEDIR = pathlib.Path(__file__).parent.resolve()
+with open(os.path.join(BASEDIR.parent, "conn_db.json"), "r", encoding='utf-8') as f:
     keys = json.load(f)
 
 def log(msg, flag=None):    
@@ -18,9 +20,10 @@ def log(msg, flag=None):
     head = ["debug", "error", "status"]
     from time import localtime, strftime
     now = strftime("%H:%M:%S", localtime())
-    if not os.path.isfile("./debug.log"):
-        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
-    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
+    logpath = os.path.join(BASEDIR, "./debug.log")
+    if not os.path.isfile(logpath):
+        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > {logpath}", shell=True)==0, print(f"[error] > shell command failed to execute")
+    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> {logpath}", shell=True)==0, print(f"[error] > shell command failed to execute")
 
 def retrieve_df(lim:int, table:str)->pd.DataFrame:
     user = keys['user']
