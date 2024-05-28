@@ -1,20 +1,17 @@
 # custom packages
 from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
-import clustering_model
-from retrieve_df import retrieve_df
-from dendrogram import plot_dendrogram, plot_fcluster
+from clustering_model import clustering_model
+from dendrogram import plot_dendrogram
+import os, subprocess, json
+from urllib import parse
+import sqlalchemy
+import pandas as pd
+import preprocess
 from log import log
-from documents_generator import documents_generator
-# external packages
-import os, pathlib, json
-import numpy as np
-from line_profiler import profile
 
-BASEDIR = pathlib.Path(__file__).parent.resolve()
-
-
-with open(os.path.join(BASEDIR.parent, "conn_db.json"), "r", encoding='utf-8') as f:
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+with open(f"conn_db.json", "r", encoding='utf-8') as f:
     keys = json.load(f)
 
 
@@ -58,7 +55,7 @@ def main():
         flag += 1 # 4
         # 클러스터링 모델
         log(f"clustering init")
-        z = clustering_model.clustering_model(similarity_matrix)
+        z = clustering_model.clustering_model(similarity_matrix.toarray())
         min_clusters = 4
         max_clusters = 8
         clusters = clustering_model.retrieve_fcluster(z, min_clusters, max_clusters)

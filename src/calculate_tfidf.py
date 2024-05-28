@@ -16,6 +16,6 @@ def calculate_tfidf(documents_generator):
     output: sparse matrix
 
     """
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(max_features = 500_000, sublinear_tf = True)
     tfidf_matrix = vectorizer.fit_transform(documents_generator)
     return tfidf_matrix

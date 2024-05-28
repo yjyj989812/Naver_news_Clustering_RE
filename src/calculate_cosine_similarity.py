@@ -13,7 +13,7 @@ def calculate_cosine_similarity(tfidf_matrix):
     문서 갯수: 100건
     similarity_matrix shape: 100 X 100 
     """
-    similarity_matrix = cosine_similarity(tfidf_matrix)
+    similarity_matrix = cosine_similarity(tfidf_matrix, dense_output=False)
     return similarity_matrix
 
 
