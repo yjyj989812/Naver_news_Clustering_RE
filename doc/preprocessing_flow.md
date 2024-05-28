@@ -41,7 +41,7 @@ dataSource | title | context |
 - - -
 ### 3. Tokenizer
 #### tokenizer로 token화
-#### 어간 추출
+#### stopword 적용
 
 - - -
 
