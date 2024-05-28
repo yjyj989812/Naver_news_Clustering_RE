@@ -27,14 +27,14 @@ def clustering_model(similarity_matrix):
 def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
     best_num_clusters = min_clusters
     for num_clusters in range(min_clusters, max_clusters + 1):
-        clusters = fcluster(Z, num_clusters, criterion='distance')
+        clusters = fcluster(Z, num_clusters, criterion='maxclust')
         num_unique_clusters = len(np.unique(clusters))
         if num_unique_clusters == num_clusters:
             best_num_clusters = num_clusters
             break
 
     # 최적의 클러스터 개수로 다시 클러스터 할당
-    clusters = fcluster(Z, best_num_clusters, criterion='distance')
+    clusters = fcluster(Z, best_num_clusters, criterion='maxclust')
     return clusters
     
 def reduce_dimensions(tfidf_matrix):
@@ -54,3 +54,20 @@ def reduce_dimensions(tfidf_matrix):
     
     return data_points
 
+def get_cluster_documents(df, clusters, cluster_num):
+    """
+    특정 클러스터에 속하는 문서들의 내용을 반환하는 함수
+    
+    Parameters:
+    - df (DataFrame): 문서 데이터프레임
+    - clusters (array): 각 문서에 할당된 클러스터 번호 배열
+    - cluster_num (int): 확인하고자 하는 클러스터 번호
+    
+    Returns:
+    - 해당 클러스터에 속하는 문서들의 내용 리스트
+    """
+    cluster_documents = []
+    for idx, cluster in enumerate(clusters):
+        if cluster == cluster_num:
+            cluster_documents.append(df.iloc[idx]['docKey'])
+    return cluster_documents

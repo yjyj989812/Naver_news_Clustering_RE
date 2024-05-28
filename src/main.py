@@ -1,14 +1,16 @@
+# custom packages
 from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
-from clustering_model import clustering_model, reduce_dimensions, retrieve_fcluster
-from dendrogram import plot_dendrogram, plot_fcluster
-import os, subprocess, json
-from urllib import parse
-import sqlalchemy
-import pandas as pd
+import clustering_model
 import preprocess
+from dendrogram import plot_dendrogram, plot_fcluster
+# external packages
+import os, subprocess, json, sqlalchemy, pathlib
+import pandas as pd
+import numpy as np
+from urllib import parse
 from line_profiler import profile
-import pathlib
+
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 BASEDIR = pathlib.Path(__file__).parent.resolve()
 with open(os.path.join(BASEDIR.parent, "conn_db.json"), "r", encoding='utf-8') as f:
@@ -22,8 +24,8 @@ def log(msg, flag=None):
     now = strftime("%H:%M:%S", localtime())
     logpath = os.path.join(BASEDIR, "./debug.log")
     if not os.path.isfile(logpath):
-        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > {logpath}", shell=True)==0, print(f"[error] > shell command failed to execute")
-    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> {logpath}", shell=True)==0, print(f"[error] > shell command failed to execute")
+        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > {logpath}", shell=True)==0, f"[error] > shell command failed to execute"
+    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> {logpath}", shell=True)==0, f"[error] > shell command failed to execute"
 
 def retrieve_df(lim:int, table:str)->pd.DataFrame:
     user = keys['user']
@@ -71,7 +73,7 @@ def main():
         # Tf-idf 가중치 계산
         log(f"tfidf calculation init")
         tfidf_matrix = calculate_tfidf(documents_generator(df, "tokens"))
-        datapoints = reduce_dimensions(tfidf_matrix)
+        datapoints = clustering_model.reduce_dimensions(tfidf_matrix)
         log(f"tfidf calculation done")
 
         flag += 1 # 3
@@ -84,10 +86,10 @@ def main():
         flag += 1 # 4
         # 클러스터링 모델
         log(f"clustering init")
-        z = clustering_model(similarity_matrix)
+        z = clustering_model.clustering_model(similarity_matrix)
         min_clusters = 4
         max_clusters = 8
-        clusters = retrieve_fcluster(z, min_clusters, max_clusters)
+        clusters = clustering_model.retrieve_fcluster(z, min_clusters, max_clusters)
         
         log(f"clustering done")
 
@@ -101,6 +103,12 @@ def main():
         plot_dendrogram(z, document_labels)
         plot_fcluster(datapoints, clusters, document_labels)
         log(f"plotting done")
+        
+        flag += 1 # 6
+        num_clusters = len(np.unique(clusters))
+        for clust_idx in range(1, num_clusters+1):
+            cluster_docs = clustering_model.get_cluster_documents(df, clusters, clust_idx)
+            log(f"size of cluster #{clust_idx} = {len(cluster_docs)}")
 
     except Exception as e:
         if flag==0: log(f"exception occurred during dataframe retrieval: {e}", 1)
@@ -108,7 +116,8 @@ def main():
         elif flag==2: log(f"exception occurred during tfidf calculation: {e}", 1)
         elif flag==3: log(f"exception occurred during cosine similarity calculation: {e}", 1)
         elif flag==4: log(f"exception occurred during clustering: {e}", 1)
-        elif flag==5: log(f"exception occurred during dendrogram plotting: {e}", 1)    
+        elif flag==5: log(f"exception occurred during dendrogram plotting: {e}", 1)
+        elif flag==6: log(f"exception occurred during cluster result analysis: {e}", 1)
     
 if __name__ == "__main__":
     """

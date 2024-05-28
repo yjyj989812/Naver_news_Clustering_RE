@@ -17,7 +17,7 @@ def plot_dendrogram(clustering, labels):
     now = strftime("%H%M%S", localtime())
     lim = len(labels)
     plt.savefig(os.path.join(CURRENT, f"./results/dendrogram_{now}_lim{lim}.png"))
-    plt.show()
+    #plt.show()
     
 def plot_fcluster(datapoints, clusters, labels):
     # 각 클러스터별 데이터 포인트 시각화
@@ -32,4 +32,4 @@ def plot_fcluster(datapoints, clusters, labels):
     now = strftime("%H%M%S", localtime())
     lim = len(labels)
     plt.savefig(os.path.join(CURRENT, f"./results/fclusters_{now}_lim{lim}.png"))
-    plt.show()
+    #plt.show()
