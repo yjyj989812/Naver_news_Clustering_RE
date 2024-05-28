@@ -3,6 +3,7 @@ from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
 
+@profile
 def clustering_model(similarity_matrix):
     # 코사인 유사도 행렬의 대각선을 1로 채워줌.
     np.fill_diagonal(similarity_matrix, 1)
@@ -24,6 +25,7 @@ def clustering_model(similarity_matrix):
     
     return z
 
+@profile
 def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
     best_num_clusters = min_clusters
     for num_clusters in range(min_clusters, max_clusters + 1):
@@ -37,6 +39,7 @@ def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
     clusters = fcluster(Z, best_num_clusters, criterion='maxclust')
     return clusters
     
+@profile
 def reduce_dimensions(tfidf_matrix):
     """
     TF-IDF 행렬을 사용하여 2차원 데이터 포인트로 차원 축소를 수행.
@@ -54,6 +57,7 @@ def reduce_dimensions(tfidf_matrix):
     
     return data_points
 
+@profile
 def get_cluster_documents(df, clusters, cluster_num):
     """
     특정 클러스터에 속하는 문서들의 내용을 반환하는 함수

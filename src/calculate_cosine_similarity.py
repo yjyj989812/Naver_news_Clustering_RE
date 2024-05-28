@@ -1,6 +1,9 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import tensorflow as tf
 
+
+
+@profile
 def calculate_cosine_similarity(tfidf_matrix):
     """
     tfidf_matrix 'sparse matrix'를 인자로 받아

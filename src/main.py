@@ -6,25 +6,18 @@ from retrieve_df import retrieve_df
 from dendrogram import plot_dendrogram, plot_fcluster
 from log import log
 # external packages
-import os, sqlalchemy, pathlib, json
+import os, pathlib, json
 import pandas as pd
 import numpy as np
 from urllib import parse
 from line_profiler import profile
 
 BASEDIR = pathlib.Path(__file__).parent.resolve()
+
+
 with open(os.path.join(BASEDIR.parent, "conn_db.json"), "r", encoding='utf-8') as f:
     keys = json.load(f)
 
-
-def documents_generator(processed_df: pd.DataFrame, col:str):
-    log("Generating documents from dataframe...")
-    log("Iteration init")
-    for idx, row in processed_df.iterrows():
-        if pd.notnull(row[col]):
-            yield row[col]  # Yield entire document
-        else:
-            log(f"null context found in {idx}!", 1)
 
 @profile
 def main():

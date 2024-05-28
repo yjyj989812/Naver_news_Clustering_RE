@@ -1,4 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+@profile
 def calculate_tfidf(documents_generator):
     """
     generator 헝식으로 입력 값을 받아 Tf-idf 가중치 계산

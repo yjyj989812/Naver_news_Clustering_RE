@@ -5,6 +5,7 @@ import os, subprocess, pathlib
 BASEDIR = pathlib.Path(__file__).parent.resolve()
 
 
+@profile
 def log(msg, flag=None):    
     if flag==None:
         flag = 0

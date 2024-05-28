@@ -5,6 +5,7 @@ import os, pathlib
 
 CURRENT = pathlib.Path(__file__).parent.resolve()
 
+@profile
 def plot_dendrogram(clustering, labels):
     result_path = os.path.join(CURRENT, "results")
     if not os.path.isdir(result_path):
@@ -18,7 +19,8 @@ def plot_dendrogram(clustering, labels):
     lim = len(labels)
     plt.savefig(os.path.join(CURRENT, f"./results/dendrogram_{now}_lim{lim}.png"))
     #plt.show()
-    
+
+@profile
 def plot_fcluster(datapoints, clusters, labels):
     # 각 클러스터별 데이터 포인트 시각화
     result_path = os.path.join(CURRENT, "results")

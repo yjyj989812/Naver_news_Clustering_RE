@@ -3,6 +3,7 @@ from urllib import parse
 import sqlalchemy
 import json
 
+@profile
 def retrieve_df(lim:int, table:str, keys:json)->pd.DataFrame:
     """
     데이터베이스 연동 및 table 데이터 추출
