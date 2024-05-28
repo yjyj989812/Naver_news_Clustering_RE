@@ -47,7 +47,7 @@ def main():
         tfidf_matrix = calculate_tfidf(documents)
         log(f"tfidf calculation done")
 
-        # PCA와 t-SNE를 통한 차원 축소 및 데이터포인트 생성
+        # PCA와 UMAP을 통한 차원 축소 및 데이터포인트 생성
         datapoints = reduce_dimensions(tfidf_matrix)
         log(f"dimension reduction done.")
         
@@ -66,7 +66,7 @@ def main():
         z = clustering_model(similarity_matrix.toarray())
         log(f"linkage done.")
         min_clusters = 4
-        max_clusters = 8
+        max_clusters = 16
         # silhouette scoring을 통해 최적의 클러스터 개수를 탐색
         log(f"scoring clustering result with size between minimum {min_clusters} and maximum {max_clusters}")
         clusters, num_clusters = retrieve_fcluster(z, min_clusters, max_clusters, datapoints)

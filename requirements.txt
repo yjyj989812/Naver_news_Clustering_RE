@@ -10,7 +10,7 @@ nltk==3.8.1
 num2words==0.5.13
 pandas==2.2.2
 pip-chill==1.0.3
-scikit-learn==1.5.0
 sqlalchemy==2.0.30
 tensorflow==2.16.1
 typing==3.7.4.3
+umap-learn==0.5.6

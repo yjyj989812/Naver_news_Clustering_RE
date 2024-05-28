@@ -2,7 +2,7 @@ import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
+import umap
 from sklearn.metrics import silhouette_score
 from line_profiler import profile
 from log import log
@@ -80,28 +80,19 @@ def reduce_dimensions(tfidf_matrix):
     """
     
     # 로그 메시지 출력
-    log(f"Starting dimension reduction...")
+    log("Starting dimension reduction...")
     
     # 데이터 정규화 및 PCA 초기화
-    log(f"Performing PCA initialization...")
+    log("Performing PCA initialization...")
     pca = PCA(n_components=50, random_state=42)
     pca_result = pca.fit_transform(tfidf_matrix.toarray())
     
-    # t-SNE 수행
-    log(f"Applying t-SNE...")
-    tsne = TSNE(
-        n_components=2,
-        perplexity=30,  # 일반적으로 사용되는 퍼플렉시티 값
-        learning_rate=200,  # 일반적으로 사용되는 학습률 값
-        max_iter=1000,  # 반복 횟수
-        init='pca',  # PCA 초기화
-        random_state=42
-    )
+    # UMAP 수행
+    log("Applying UMAP...")
+    umap_model = umap.UMAP(n_components=2)
+    data_points = umap_model.fit_transform(pca_result)
     
-    # t-SNE를 사용하여 차원 축소 수행
-    data_points = tsne.fit_transform(pca_result)
-    
-    log(f"Dimension reduction completed.")
+    log("Dimension reduction completed.")
     
     return data_points
 
