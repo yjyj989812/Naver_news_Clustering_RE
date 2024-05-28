@@ -158,3 +158,6 @@ text_preprocessing.ipynb
 
 # db info
 conn_db.json
+
+# pickles
+*.pkl
