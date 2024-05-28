@@ -12,8 +12,6 @@ import tqdm
 import pandas as pd
 from babel.numbers import get_currency_name
 import cityhash
-from line_profiler import profile
-
 
 # data processing 
 class text_processor:
