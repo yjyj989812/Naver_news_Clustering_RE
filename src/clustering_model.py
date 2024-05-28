@@ -72,8 +72,7 @@ def get_cluster_documents(df, clusters, cluster_num):
     Returns:
     - 해당 클러스터에 속하는 문서들의 내용 리스트
     """
-    cluster_documents = []
-    for idx, cluster in enumerate(clusters):
-        if cluster == cluster_num:
-            cluster_documents.append(df.iloc[idx]['docKey'])
+    
+    cluster_indices = [idx for idx, cluster in enumerate(clusters) if cluster == cluster_num]
+    cluster_documents = df.iloc[cluster_indices]['docKey'].tolist()
     return cluster_documents
