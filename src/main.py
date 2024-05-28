@@ -2,41 +2,20 @@
 from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
 import clustering_model
-import preprocess
+from retrieve_df import retrieve_df
 from dendrogram import plot_dendrogram, plot_fcluster
+from log import log
 # external packages
-import os, subprocess, json, sqlalchemy, pathlib
+import os, sqlalchemy, pathlib, json
 import pandas as pd
 import numpy as np
 from urllib import parse
 from line_profiler import profile
 
-os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 BASEDIR = pathlib.Path(__file__).parent.resolve()
 with open(os.path.join(BASEDIR.parent, "conn_db.json"), "r", encoding='utf-8') as f:
     keys = json.load(f)
 
-def log(msg, flag=None):    
-    if flag==None:
-        flag = 0
-    head = ["debug", "error", "status"]
-    from time import localtime, strftime
-    now = strftime("%H:%M:%S", localtime())
-    logpath = os.path.join(BASEDIR, "./debug.log")
-    if not os.path.isfile(logpath):
-        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > {logpath}", shell=True)==0, f"[error] > shell command failed to execute"
-    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> {logpath}", shell=True)==0, f"[error] > shell command failed to execute"
-
-def retrieve_df(lim:int, table:str)->pd.DataFrame:
-    user = keys['user']
-    password = keys['password']
-    host = keys['host']
-    port = keys['port']
-    database = keys['database']
-    password = parse.quote_plus(password)
-    engine = sqlalchemy.create_engine(f"mysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4")
-    df = pd.read_sql_query("select * from {} LIMIT {}".format(keys[table], lim), con=engine)
-    return df
 
 def documents_generator(processed_df: pd.DataFrame, col:str):
     log("Generating documents from dataframe...")
@@ -54,7 +33,7 @@ def main():
         log(f"retrieving dataframe from database...")
         lim = 100
         log(f"with lim : {lim}")
-        df = retrieve_df(lim, "tokenized") # "lake", "tokenized", "warehouse"
+        df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
         flag += 1 # 1
         # 전처리
         # null 값 처리
@@ -126,4 +105,8 @@ if __name__ == "__main__":
         -> cosine similarity matrix
         hierarchical agglomerative clustering
     """
+
+    os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+    
+
     main()
