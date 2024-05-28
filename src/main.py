@@ -3,17 +3,14 @@ from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
 import clustering_model
 from dendrogram import plot_dendrogram, plot_fcluster
-import os, subprocess, json
-from urllib import parse
-import sqlalchemy
-import pandas as pd
-import preprocess
-from log import log
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
-import numpy as np
-import pickle, pathlib
 from clustered_dataframe import retrieve_cluster_results
+from log import log
+import preprocess
+# external packages
+import os, json, pickle, pathlib
+import numpy as np
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 BASEDIR = pathlib.Path(__file__).parent.resolve()
