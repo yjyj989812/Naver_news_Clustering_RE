@@ -154,8 +154,12 @@ cython_debug/
 
 # for dev_yjy
 data_
+text_preprocessing.ipynb
 code/
 
 # db info
 conn_db.json
 .API_KEY_/
+
+# pickles
+*.pkl
