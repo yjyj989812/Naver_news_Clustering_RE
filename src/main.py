@@ -5,6 +5,7 @@ from dendrogram import plot_dendrogram, plot_fcluster
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
 from clustered_dataframe import retrieve_cluster_results
+import clustering_model
 from log import log
 import preprocess
 # external packages
@@ -44,7 +45,7 @@ def main():
         log(f"tfidf calculation init")
         tokens = "tokens"
         tfidf_matrix = calculate_tfidf(documents_generator(df, tokens))
-        datapoints = reduce_dimensions(tfidf_matrix)
+        datapoints = clustering_model.reduce_dimensions(tfidf_matrix)
         log(f"tfidf calculation done")
 
         flag += 1 # 3
@@ -57,10 +58,10 @@ def main():
         flag += 1 # 4
         # 클러스터링 모델
         log(f"clustering init")
-        z = clustering_model(similarity_matrix.toarray())
+        z = clustering_model.clustering_model(similarity_matrix.toarray())
         min_clusters = 4
         max_clusters = 8
-        clusters = retrieve_fcluster(z, min_clusters, max_clusters)
+        clusters = clustering_model.retrieve_fcluster(z, min_clusters, max_clusters)
         
         log(f"clustering done")
 
@@ -80,7 +81,7 @@ def main():
             pickle.dump(retrieve_cluster_results(df, clusters), f)
         num_clusters = len(np.unique(clusters))
         for clust_idx in range(1, num_clusters+1):
-            cluster_docs = get_cluster_documents(df, clusters, clust_idx)
+            cluster_docs = clustering_model.get_cluster_documents(df, clusters, clust_idx)
             log(f"size of cluster #{clust_idx} = {len(cluster_docs)}")
 
 
