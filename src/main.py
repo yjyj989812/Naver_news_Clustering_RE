@@ -5,12 +5,11 @@ import clustering_model
 from retrieve_df import retrieve_df
 from dendrogram import plot_dendrogram, plot_fcluster
 from log import log
+from documents_generator import documents_generator
 # external packages
 import os, pathlib, json
-import pandas as pd
 import numpy as np
-from urllib import parse
-from line_profiler import profile
+
 
 BASEDIR = pathlib.Path(__file__).parent.resolve()
 

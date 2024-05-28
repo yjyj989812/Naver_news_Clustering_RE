@@ -1,4 +1,5 @@
 from log import log
+import pandas as pd
 
 @profile
 def documents_generator(processed_df: pd.DataFrame, col:str):
