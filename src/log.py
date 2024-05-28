@@ -1,5 +1,5 @@
 import os, subprocess, pathlib
-
+from line_profiler import profile
 
 
 BASEDIR = pathlib.Path(__file__).parent.resolve()

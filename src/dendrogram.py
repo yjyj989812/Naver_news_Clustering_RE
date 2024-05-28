@@ -2,6 +2,7 @@ from scipy.cluster.hierarchy import dendrogram
 import matplotlib.pyplot as plt
 from time import localtime, strftime
 import os, pathlib
+from line_profiler import profile
 
 CURRENT = pathlib.Path(__file__).parent.resolve()
 

@@ -9,7 +9,7 @@ from documents_generator import documents_generator
 # external packages
 import os, pathlib, json
 import numpy as np
-
+from line_profiler import profile
 
 BASEDIR = pathlib.Path(__file__).parent.resolve()
 
@@ -43,7 +43,8 @@ def main():
         flag += 1 # 2
         # Tf-idf 가중치 계산
         log(f"tfidf calculation init")
-        tfidf_matrix = calculate_tfidf(documents_generator(df, "tokens"))
+        tokens = "tokens"
+        tfidf_matrix = calculate_tfidf(documents_generator(df, tokens))
         datapoints = clustering_model.reduce_dimensions(tfidf_matrix)
         log(f"tfidf calculation done")
 

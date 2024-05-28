@@ -2,6 +2,7 @@ import pandas as pd
 from urllib import parse
 import sqlalchemy
 import json
+from line_profiler import profile
 
 @profile
 def retrieve_df(lim:int, table:str, keys:json)->pd.DataFrame:

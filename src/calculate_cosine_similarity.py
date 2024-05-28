@@ -1,6 +1,6 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import tensorflow as tf
-
+from line_profiler import profile
 
 
 @profile

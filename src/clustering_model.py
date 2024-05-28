@@ -2,6 +2,8 @@ import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
+from line_profiler import profile
+
 
 @profile
 def clustering_model(similarity_matrix):

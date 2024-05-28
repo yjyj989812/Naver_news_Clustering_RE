@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+from line_profiler import profile
 
 @profile
 def calculate_tfidf(documents_generator):
