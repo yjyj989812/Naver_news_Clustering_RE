@@ -1,8 +1,0 @@
-{
-"USER" : "team5",
-"PASS" : "encore!@#",
-"HOST" : "43.202.5.70",
-"PORT" : "3306",
-"DB" : "2nd_db5"
-'table': 'english_news_lake'
-} 
