@@ -163,3 +163,9 @@ conn_db.json
 
 # pickles
 *.pkl
+
+# pyplot and profiler result images
+src/results/
+
+# ??
+*.lprof

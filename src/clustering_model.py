@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
+from sklearn.manifold import TSNE
 
 def clustering_model(similarity_matrix):
     # 코사인 유사도 행렬의 대각선을 1로 채워줌.
@@ -20,4 +21,34 @@ def clustering_model(similarity_matrix):
     
     # 계층적 병합 클러스터링 
     z = linkage(condensed_distance, method='ward')
+    
     return z
+
+def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
+    best_num_clusters = min_clusters
+    for num_clusters in range(min_clusters, max_clusters + 1):
+        clusters = fcluster(Z, num_clusters, criterion='maxclust')
+        num_unique_clusters = len(np.unique(clusters))
+        if num_unique_clusters == num_clusters:
+            best_num_clusters = num_clusters
+            break
+
+    # 최적의 클러스터 개수로 다시 클러스터 할당
+    clusters = fcluster(Z, best_num_clusters, criterion='maxclust')
+    return clusters
+    
+def reduce_dimensions(tfidf_matrix):
+    """
+    TF-IDF 행렬을 사용하여 2차원 데이터 포인트로 차원 축소를 수행합니다.
+
+    Parameters:
+    tfidf_matrix (scipy.sparse.csr.csr_matrix): TF-IDF 행렬.
+
+    Returns:
+    numpy.ndarray: (n, 2) 크기의 2차원 데이터 포인트 배열.
+    """
+    tsne = TSNE(n_components=2, random_state=42)
+    data_points = tsne.fit_transform(tfidf_matrix.toarray())
+    
+    return data_points
+
