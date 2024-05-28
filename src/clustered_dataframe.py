@@ -30,7 +30,7 @@ def retrieve_cluster_results(df:pd.DataFrame, clusters):
     return result_df
 
 @profile
-def indexing_cluster_random(df, num_rows):
+def indexing_cluster_random(df):
     """
     데이터프레임에서 절반의 행을 랜덤하게 선택하여 새로운 데이터프레임을 반환하는 함수
 
@@ -38,13 +38,15 @@ def indexing_cluster_random(df, num_rows):
         df (pd.DataFrame): 원본 데이터프레임
 
     Returns:
-        pd.DataFrame: 랜덤하게 선택된 행으로 이루어진 새로운 데이터프레임
+        (pd.DataFrame, list): 랜덤하게 선택된 행으로 이루어진 새로운 데이터프레임과 첫 번째 열의 리스트
 
     데이터프레임에서 절반의 행을 랜덤하게 선택하여 새로운 데이터프레임을 반환
     """
     np.random.seed(42)
-    num_selected_rows = num_rows // 2
-    selected_rows = np.random.choice(df.index, num_selected_rows)
+    num_rows = df.shape[0]
+    num_rows = num_rows // 2
+    selected_rows = np.random.choice(df.index, num_rows)
     new_df = df.loc[selected_rows]
+    list_index = df.iloc[selected_rows, 0].tolist()
   
-    return new_df
+    return new_df, list_index

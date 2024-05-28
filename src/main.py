@@ -28,6 +28,14 @@ def main():
         df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
         flag += 1 # 1
         
+        #---------------------------랜덤 수정----------------------------------------------------------
+        random_label_df, label_index = indexing_cluster_random(df)
+        print(random_label_df, label_index)
+
+        # reset_index
+        random_label_df = random_label_df.reset_index(drop=True)
+        print(random_label_df)
+        #--------------------------------------------------------------------------------------------
 
         flag += 1 # 2
         # Tf-idf 가중치 계산
@@ -58,8 +66,6 @@ def main():
         # 덴드로그램 
         # 총 문서 갯수
         num_documents = df.shape[0]
-        random_label_df = indexing_cluster_random(df, num_documents)
-        
         # 각 문서에 대한 라벨 생성
         document_labels = [f"{df.iloc[x]['docKey']}" for x in range(num_documents)]
         log(f"plotting init")
