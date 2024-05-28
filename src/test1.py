@@ -9,9 +9,10 @@ import nltk
 import pandas as pd
 import preprocess
 
-with open(f"..\\conn_db.json", "r", encoding='utf-8') as f:
+with open(f"conn_db.json", "r", encoding='utf-8') as f:
     keys = json.load(f)
 
+@profile
 def log(msg, flag=None):    
     if flag==None:
         flag = 0
@@ -22,10 +23,12 @@ def log(msg, flag=None):
         assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
     else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
 
+@profile
 def retrieve_df():
     engine = establish_conn()
-    return pd.read_sql_query("select * from english_news_lake LIMIT 1000", con=engine)
+    return pd.read_sql_query("select * from english_news_lake LIMIT 5000", con=engine)
 
+@profile
 def establish_conn()->sqlalchemy.Engine:
     user = keys['user']
     password = keys['password']
@@ -36,6 +39,7 @@ def establish_conn()->sqlalchemy.Engine:
     engine = sqlalchemy.create_engine(f"mysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4")
     return engine
 
+@profile
 def documents_generator(df:pd.DataFrame):
     log(f"generating documents from dataframe...")
     log(f"iteration init")
@@ -43,6 +47,7 @@ def documents_generator(df:pd.DataFrame):
         log(f"iteration index : {idx}, row : {row}")
         yield from row['processed_context']
 
+@profile
 def main():
     log(f"retrieving dataframe from database...")
     df = retrieve_df()
