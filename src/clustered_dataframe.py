@@ -14,8 +14,14 @@ def retrieve_cluster_results(df:pd.DataFrame, clusters):
         for docKey in get_cluster_documents(df, clusters, clust_idx):
             docs_cluster_numberings[docKey] = clust_idx
     result_df['cluster_num'] = result_df['docKey'].map(docs_cluster_numberings)
-    
-    
-    print(result_df)
-    
+
     return result_df
+
+@proflie
+def indexing_cluster_random(df, num_rows):
+    np.random.seed(42)
+    num_selected_rows = num_rows // 2
+    selected_rows = np.random.choice(df.index, num_selected_rows)
+    new_df = df.loc[selected_rows]
+  
+    return new_df

@@ -4,7 +4,7 @@ from calculate_cosine_similarity import calculate_cosine_similarity
 from dendrogram import plot_dendrogram, plot_fcluster
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
-from clustered_dataframe import retrieve_cluster_results
+from clustered_dataframe import retrieve_cluster_results, indexing_cluster_random
 from clustering_model import clustering_model, reduce_dimensions, get_cluster_documents, retrieve_fcluster
 from log import log, logging
 
@@ -27,18 +27,7 @@ def main():
         log(f"with lim : {lim}")
         df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
         flag += 1 # 1
-        # 전처리
-        # null 값 처리
-        # df = df.dropna()
-        # log(f"null values removed")
-        # # 전처리작업을 거친 df를 반환
-        # log(f"processing on rows...")
-        # df2 = preprocess.preprocess_df(df=df).copy()
-        # log("processed columns assigned.")
-        # # 문서별 정제된 title + context를 기준으로 hash값 생성
-        # log(f"hash id generating...") 
-        # df3 = preprocess.create_hash(df2).copy()
-        # log(f"hash id assigned for each doc.")
+        
 
         flag += 1 # 2
         # Tf-idf 가중치 계산
@@ -69,6 +58,8 @@ def main():
         # 덴드로그램 
         # 총 문서 갯수
         num_documents = df.shape[0]
+        random_label_df = indexing_cluster_random(df, num_documents)
+        print(random_label_df)
         # 각 문서에 대한 라벨 생성
         document_labels = [f"{df.iloc[x]['docKey']}" for x in range(num_documents)]
         log(f"plotting init")
