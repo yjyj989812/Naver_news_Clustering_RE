@@ -160,3 +160,6 @@ code/
 # db info
 conn_db.json
 .API_KEY_/
+
+# pickles
+*.pkl
