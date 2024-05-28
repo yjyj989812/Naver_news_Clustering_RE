@@ -23,7 +23,7 @@ def main():
     flag = 0
     try:
         log(f"retrieving dataframe from database...")
-        lim = 10000
+        lim = 100
         log(f"with lim : {lim}")
         df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
         flag += 1 # 1
@@ -90,6 +90,8 @@ def main():
         elif flag==4: log(f"exception occurred during clustering: {e}", 1)
         elif flag==5: log(f"exception occurred during dendrogram plotting: {e}", 1)
         elif flag==6: log(f"exception occurred during cluster result analysis: {e}", 1)
+        else:
+            log(f"exception on unexpected flag: {e}", 1)
     
 if __name__ == "__main__":
     """
