@@ -29,7 +29,21 @@ def clustering_model(similarity_matrix):
 
 @profile
 def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
+    """
+    계층적 클러스터링 결과에서 최적의 클러스터 개수를 결정하고 해당 클러스터링 결과를 반환하는 함수
+
+    Parameters:
+        Z (np.ndarray): 계층적 클러스터링 결과 배열
+        min_clusters (int): 최소 클러스터 개수
+        max_clusters (int): 최대 클러스터 개수
+
+    Returns:
+        np.ndarray: 최적의 클러스터링 결과 배열
+
+    계층적 클러스터링 결과에서 최적의 클러스터 개수를 결정하고 해당 클러스터링 결과를 반환
+    """
     best_num_clusters = min_clusters
+    
     for num_clusters in range(min_clusters, max_clusters + 1):
         clusters = fcluster(Z, num_clusters, criterion='maxclust')
         num_unique_clusters = len(np.unique(clusters))
@@ -39,6 +53,7 @@ def retrieve_fcluster(Z, min_clusters:int, max_clusters:int):
 
     # 최적의 클러스터 개수로 다시 클러스터 할당
     clusters = fcluster(Z, best_num_clusters, criterion='maxclust')
+
     return clusters
     
 @profile

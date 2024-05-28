@@ -59,7 +59,7 @@ def main():
         # 총 문서 갯수
         num_documents = df.shape[0]
         random_label_df = indexing_cluster_random(df, num_documents)
-        print(random_label_df)
+        
         # 각 문서에 대한 라벨 생성
         document_labels = [f"{df.iloc[x]['docKey']}" for x in range(num_documents)]
         log(f"plotting init")
