@@ -1,2 +1,2 @@
 @echo off
-kernprof -l -v main.py > src\results\profiler_result.txt
+kernprof -l -v src\main.py > src\results\profiler_result.txt
