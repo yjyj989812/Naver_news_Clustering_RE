@@ -1,14 +1,17 @@
 # custom packages
 from calculate_tfidf import calculate_tfidf
 from calculate_cosine_similarity import calculate_cosine_similarity
-from clustering_model import clustering_model
-from dendrogram import plot_dendrogram
+import clustering_model
+from dendrogram import plot_dendrogram, plot_fcluster
 import os, subprocess, json
 from urllib import parse
 import sqlalchemy
 import pandas as pd
 import preprocess
 from log import log
+from retrieve_df import retrieve_df
+from documents_generator import documents_generator
+import numpy as np
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 with open(f"conn_db.json", "r", encoding='utf-8') as f:
@@ -20,7 +23,7 @@ def main():
     flag = 0
     try:
         log(f"retrieving dataframe from database...")
-        lim = 100
+        lim = 10000
         log(f"with lim : {lim}")
         df = retrieve_df(lim, "tokenized", keys) # "lake", "tokenized", "warehouse"
         flag += 1 # 1
