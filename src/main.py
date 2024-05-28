@@ -12,11 +12,13 @@ from log import log
 from retrieve_df import retrieve_df
 from documents_generator import documents_generator
 import numpy as np
+import pickle, pathlib
+from clustered_dataframe import retrieve_cluster_results
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-with open(f"conn_db.json", "r", encoding='utf-8') as f:
+BASEDIR = pathlib.Path(__file__).parent.resolve()
+with open(os.path.join(BASEDIR, "../conn_db.json"), "r", encoding='utf-8') as f:
     keys = json.load(f)
-
 
 @profile
 def main():
@@ -77,6 +79,8 @@ def main():
         log(f"plotting done")
         
         flag += 1 # 6
+        with open(os.path.join(BASEDIR, "./results/result_df.pkl"), "wb") as f:
+            pickle.dump(retrieve_cluster_results(df, clusters), f)
         num_clusters = len(np.unique(clusters))
         for clust_idx in range(1, num_clusters+1):
             cluster_docs = clustering_model.get_cluster_documents(df, clusters, clust_idx)
