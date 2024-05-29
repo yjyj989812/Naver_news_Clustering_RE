@@ -77,6 +77,8 @@ def main():
 
         flag += 1 # 5
         # 덴드로그램 
+
+
         # 총 문서 갯수
         num_documents = df.shape[0]
         # 각 문서에 대한 라벨 생성
