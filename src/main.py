@@ -1,102 +1,105 @@
-# custom packages
 from calculate_tfidf import calculate_tfidf
-from calculate_cosine_similarity import calculate_cosine_similarity, calculate_cosine_similarity_gpu
-from dendrogram import plot_dendrogram, plot_fcluster
-from retrieve_df import retrieve_df
-from documents_generator import documents_generator
-from clustered_dataframe import retrieve_cluster_results, dataframe_rand_selection
-from clustering_model import clustering_model, reduce_dimensions, get_cluster_documents, retrieve_fcluster
-from log import log, step_log
-
-# external packages
-import os, json, pickle, pathlib
-import numpy as np
-from line_profiler import profile
+from calculate_cosine_similarity import calculate_cosine_similarity
+from clustering_model import clustering_model
+from dendrogram import plot_dendrogram
+import os, subprocess, json
+from urllib import parse
+import sqlalchemy
+import pandas as pd
+import preprocess
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-BASEDIR = pathlib.Path(__file__).parent.resolve()
-with open(os.path.join(BASEDIR, "../conn_db.json"), "r", encoding='utf-8') as f:
+with open(f"conn_db.json", "r", encoding='utf-8') as f:
     keys = json.load(f)
 
-@profile
+def log(msg, flag=None):    
+    if flag==None:
+        flag = 0
+    head = ["debug", "error", "status"]
+    from time import localtime, strftime
+    now = strftime("%H:%M:%S", localtime())
+    if not os.path.isfile("./debug.log"):
+        assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" > debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
+    else: assert subprocess.call(f"echo \"[{now}][{head[flag]}] > {msg}\" >> debug.log", shell=True)==0, print(f"[error] > shell command failed to execute")
+
+def retrieve_df(lim:int)->pd.DataFrame:
+    user = keys['user']
+    password = keys['password']
+    host = keys['host']
+    port = keys['port']
+    database = keys['database']
+    password = parse.quote_plus(password)
+    engine = sqlalchemy.create_engine(f"mysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4")
+    df = pd.read_sql_query("select * from {} LIMIT {}".format(keys['table'], lim), con=engine)
+    return df
+
+def documents_generator(processed_df: pd.DataFrame):
+    log("Generating documents from dataframe...")
+    log("Iteration init")
+    for idx, row in processed_df.iterrows():
+        if pd.notnull(row['processed_context']):
+            yield row['processed_context']  # Yield entire document
+        else:
+            log(f"null context found in {idx}!", 1)
+
 def main():
+    try:
+        log(f"retrieving dataframe from database...")
+        lim = 15000
+        log(f"with lim : {lim}")
+        df = retrieve_df(lim)
+    except Exception as e:
+        log(f"exception occurred during dataframe retrieval: {e}", 1)
     flag = 0
     try:
-        # DB에서 Dataframe 추출
-        log(f"retrieving dataframe from database...")
-        lim = 60000
-        log(f"with lim : {lim}")
-        num_rows = 1000
-        table = "tokenized"
-        df = retrieve_df(lim, table, keys) # "lake", "tokenized", "warehouse"
-        
+        # 전처리
+        # null 값 처리
+        df = df.dropna()
+        log(f"null values removed")
+        # 전처리작업을 거친 df를 반환
+        log(f"processing on rows...")
+        df2 = preprocess.preprocess_df(df=df).copy()
+        log("processed columns assigned.")
+        # 문서별 정제된 title + context를 기준으로 hash값 생성
+        log(f"hash id generating...") 
+        df3 = preprocess.create_hash(df2).copy()
+        log(f"hash id assigned for each doc.")
+
         flag += 1 # 1
-        # Dataframe에서 랜덤하게 절반의 크기로 선택
-        log(f"random selection on progress...")
-        log(f"dataframe will be randomly selected to size of {num_rows}.")
-        filtered_df = dataframe_rand_selection(df, num_rows)
-        # random으로 선택된 row들이기 때문에 index를 초기화
-        df = filtered_df.reset_index(drop=True)
-        log(f"random selection done with shape of {df.shape}")
-        col = "tokens"
-        log("Generating documents from dataframe...")
-        documents = documents_generator(df, col)
-        log(f"document generation done.")
-
-
-        flag += 1 # 2
         # Tf-idf 가중치 계산
         log(f"tfidf calculation init")
-        tfidf_matrix = calculate_tfidf(documents)
+        tfidf_matrix = calculate_tfidf(documents_generator(df3))
         log(f"tfidf calculation done")
 
-        # PCA와 UMAP을 통한 차원 축소 및 데이터포인트 생성
-        datapoints = reduce_dimensions(tfidf_matrix)
-        log(f"dimension reduction done.")
-        
-
-        flag += 1 # 3
+        flag += 1 # 2
         # 코사인 유사도 계산
         log(f"calculating cosine similarity...")
         similarity_matrix = calculate_cosine_similarity(tfidf_matrix)
-        #similarity_matrix = calculate_cosine_similarity_gpu(tfidf_matrix) # insufficient resources
+        #similarity_matrix = calculate_cosine_similarity(tfidf_matrix, True)
         log(f"cosine similarity calculated")
 
-
-        flag += 1 # 4
+        flag += 1 # 3
         # 클러스터링 모델
         log(f"clustering init")
-        z = clustering_model(similarity_matrix.toarray())
-        log(f"linkage done.")
-        min_clusters = 4
-        max_clusters = 16
-        # silhouette scoring을 통해 최적의 클러스터 개수를 탐색
-        log(f"scoring clustering result with size between minimum {min_clusters} and maximum {max_clusters}")
-        clusters, num_clusters = retrieve_fcluster(z, min_clusters, max_clusters, datapoints)
-        log(f"clustering done with best cluster number of {num_clusters}")
+        clustering = clustering_model(similarity_matrix)
+        log(f"clustering done")
 
-        flag += 1 # 5
+        flag += 1 # 4
         # 덴드로그램 
-
-
         # 총 문서 갯수
         num_documents = df.shape[0]
         # 각 문서에 대한 라벨 생성
-        document_labels = [f"{df.iloc[x]['docKey']}" for x in range(num_documents)]
+        document_labels = [f"{df3.iloc[x]['docKey']}" for x in range(num_documents)]
         log(f"plotting init")
-        plot_dendrogram(z, document_labels)
-        plot_fcluster(datapoints, clusters, document_labels)
+        plot_dendrogram(clustering, document_labels)
         log(f"plotting done")
-        
-        flag += 1 # 6
-        with open(os.path.join(BASEDIR, f"./results/result_df_({lim}_{num_rows}).pkl"), "wb") as f:
-            pickle.dump(retrieve_cluster_results(df, clusters), f)
-        for clust_idx in range(1, num_clusters+1):
-            cluster_docs = get_cluster_documents(df, clusters, clust_idx)
-            log(f"size of cluster #{clust_idx} = {len(cluster_docs)}")
 
     except Exception as e:
-        step_log(flag, e)
+        if flag==0: log(f"exception occurred during data preprocess: {e}", 1)
+        elif flag==1: log(f"exception occurred during tfidf calculation: {e}", 1)
+        elif flag==2: log(f"exception occurred during cosine similarity calculation: {e}", 1)
+        elif flag==3: log(f"exception occurred during clustering: {e}", 1)
+        elif flag==4: log(f"exception occurred during dendrogram plotting: {e}", 1)    
     
 if __name__ == "__main__":
     """
@@ -105,6 +108,4 @@ if __name__ == "__main__":
         -> cosine similarity matrix
         hierarchical agglomerative clustering
     """
-
-
     main()
