@@ -13,7 +13,6 @@ import pandas as pd
 from babel.numbers import get_currency_name
 import cityhash
 
-
 # data processing 
 class text_processor:
     def __init__(self, text):
