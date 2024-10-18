@@ -5,7 +5,7 @@ dask==2024.5.1
 ipykernel==6.29.4
 matplotlib==3.9.0
 mysqlclient==2.2.4
-nltk==3.8.1
+nltk==3.9
 num2words==0.5.13
 pandas==2.2.2
 pip-chill==1.0.3
